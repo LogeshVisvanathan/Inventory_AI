@@ -13,6 +13,10 @@ interface FormData {
   Current_Stock: string
   Lead_Time: string
   Safety_Stock: string
+  Demand_Variability: string
+  Seasonal_Factor: string
+  Supplier_Reliability: string
+  Transport_Delay: string
 }
 
 interface PredictionResult {
@@ -34,14 +38,18 @@ const CornerBrackets = () => (
 
 export default function InventoryPredictionPage() {
   const [form, setForm] = useState<FormData>({
-    Planned_Qty:   '',
-    Actual_Qty:    '',
-    Planned_Rate:  '',
-    Actual_Rate:   '',
-    Current_Stock: '',
-    Lead_Time:     '',
-    Safety_Stock:  '',
-  })
+  Planned_Qty: '',
+  Actual_Qty: '',
+  Planned_Rate: '',
+  Actual_Rate: '',
+  Current_Stock: '',
+  Lead_Time: '',
+  Safety_Stock: '',
+  Demand_Variability: '',
+  Seasonal_Factor: '',
+  Supplier_Reliability: '',
+  Transport_Delay: '',
+})
   const [result, setResult]         = useState<PredictionResult | null>(null)
   const [isPredicting, setIsPredicting] = useState(false)
   const [error, setError]           = useState<string | null>(null)
@@ -59,14 +67,21 @@ export default function InventoryPredictionPage() {
 
     try {
       const payload = {
-        Planned_Qty:   parseFloat(form.Planned_Qty),
-        Actual_Qty:    parseFloat(form.Actual_Qty),
-        Planned_Rate:  parseFloat(form.Planned_Rate),
-        Actual_Rate:   parseFloat(form.Actual_Rate),
-        Current_Stock: parseFloat(form.Current_Stock),
-        Lead_Time:     parseFloat(form.Lead_Time),
-        Safety_Stock:  parseFloat(form.Safety_Stock),
-      }
+  Planned_Qty: parseFloat(form.Planned_Qty),
+  Actual_Qty: parseFloat(form.Actual_Qty),
+  Planned_Rate: parseFloat(form.Planned_Rate),
+  Actual_Rate: parseFloat(form.Actual_Rate),
+  Current_Stock: parseFloat(form.Current_Stock),
+  Lead_Time: parseFloat(form.Lead_Time),
+  Safety_Stock: parseFloat(form.Safety_Stock),
+
+  // MODEL REQUIRED FEATURES
+  Demand_Variability: 1,
+  Seasonal_Factor: 1,
+  Supplier_Reliability: 0.9,
+  Transport_Delay: 2
+}
+
 
       const res = await axios.post('http://127.0.0.1:5000/predict', payload)
       setResult(res.data)
@@ -82,7 +97,15 @@ export default function InventoryPredictionPage() {
     }
   }
 
-  const isFormValid = Object.values(form).every(v => v !== '' && !isNaN(parseFloat(v)))
+ const isFormValid =
+  form.Planned_Qty !== '' &&
+  form.Actual_Qty !== '' &&
+  form.Planned_Rate !== '' &&
+  form.Actual_Rate !== '' &&
+  form.Current_Stock !== '' &&
+  form.Lead_Time !== '' &&
+  form.Safety_Stock !== ''
+
 
   const isReorder     = result?.Alert === 'REORDER REQUIRED'
   const varianceColor = result ? (result.Variance <= 0 ? 'text-chart-accent3' : 'text-destructive') : 'text-foreground'
